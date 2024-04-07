@@ -1,0 +1,31 @@
+version: '3'
+services:
+  db:
+    image: postgres:16.2
+    container_name: bank-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: local-db
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 1s
+      timeout: 1s
+      retries: 5
+  liquibase:
+    image: liquibase/liquibase:4.27-alpine
+    container_name: liquibase
+    volumes:
+      - ./liquibase/changelog.yml:/liquibase/changelog.yml
+      - ./liquibase/changelogs:/liquibase/changelogs
+    command:
+      - --url=jdbc:postgresql://db:5432/local-db
+      - --changeLogFile=./changelog.yml
+      - --username=postgres
+      - --password=postgres
+      - update
+    depends_on:
+      db:
+        condition: service_healthy
