@@ -10,10 +10,12 @@ CREATE TABLE IF NOT EXISTS gophbank.users (
     email VARCHAR(100) UNIQUE NOT NULL
 );
 
+CREATE TYPE account_type_enum AS ENUM ('checking', 'savings');
+
 CREATE TABLE IF NOT EXISTS gophbank.accounts (
     account_id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES gophbank.users(user_id),
-    account_type VARCHAR(10) CHECK (account_type IN ('checking', 'savings')) NOT NULL,
+    account_type account_type_enum NOT NULL,
     balance DECIMAL(12, 2) CHECK (balance >= 0) NOT NULL,
     interest_rate DECIMAL(3, 2) CHECK ((account_type = 'savings' AND interest_rate >= 0) OR (account_type = 'checking' AND interest_rate = 0))
 );
@@ -33,6 +35,7 @@ CREATE TABLE IF NOT EXISTS gophbank.transactions (
 );
 
 --rollback DROP TABLE IF EXISTS gophbank.transactions;
+--rollback DROP TYPE IF EXISTS account_type_enum;
 --rollback DROP TABLE IF EXISTS gophbank.accounts;
 --rollback DROP TABLE IF EXISTS gophbank.users;
 --rollback DROP SCHEMA IF EXISTS gophbank;
