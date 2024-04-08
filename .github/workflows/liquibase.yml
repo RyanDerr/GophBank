@@ -1,17 +1,11 @@
 name: Liquibase Update
 
 on:
-  push:
-    branches: [ main ]
   workflow_dispatch:
-
-env:
-  LIQUIBASE_URL: ${{ secrets.DB_URL }}
-  LIQUIBASE_USERNAME: ${{ secrets.DB_USERNAME }}
-  LIQUIBASE_PASSWORD: ${{ secrets.DB_PASSWORD }}
+    branches: [ main ]
 
 jobs:
-  build:
+  execute-liquibase-update:
     runs-on: ubuntu-latest
     environment: 'liquibase'
 
@@ -26,11 +20,8 @@ jobs:
         distribution: 'adopt'
 
     - name: Download Liquibase
-      run: |
-        wget https://github.com/liquibase/liquibase/releases/download/v4.3.5/liquibase-4.3.5.tar.gz
-        tar xzf liquibase-4.3.5.tar.gz
-        sudo mv liquibase-4.3.5 /usr/local/liquibase
+      run: sudo snap install liquibase
 
     - name: Run Liquibase Update
       run: |
-        /usr/local/liquibase/liquibase --url="${LIQUIBASE_URL}" --username="${LIQUIBASE_USERNAME}" --password="${LIQUIBASE_PASSWORD}" --changeLogFile=./liquibase/changelog.yml update
+        liquibase --url ${{ secrets.DB_URL }} --username ${{ secrets.DB_USERNAME }} --password ${{ secrets.DB_PASSWORD }} --changeLogFile=./liquibase/changelog.yml update
