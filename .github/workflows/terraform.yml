@@ -6,7 +6,6 @@ on:
     paths:
     - 'terraform/**'
   workflow_dispatch:
-    branches: [ main ]
 
 jobs:
   terraform_plan:
