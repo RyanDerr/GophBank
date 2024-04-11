@@ -9,12 +9,23 @@ on:
     inputs:
       destroy:
         description: 'Create a destroy plan?'
-        required: false
+        type: choice
+        options:
+        - 'true'
+        - 'false'
         default: 'false'
+      terraform_working_dir:
+        type: choice
+        description: 'Terraform environment'
+        options:
+        - dev
+        - test
+        - prod
+        default: 'dev'
 
 env:
   TERRAFORM_VERSION: "1.7.2"
-  TERRAFORM_DIR: "./terraform"
+  TERRAFORM_DIR: "./terraform/live/${{ github.event.inputs.terraform_working_dir }}"
 
 jobs:
   terraform_plan:

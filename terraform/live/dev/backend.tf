@@ -8,9 +8,9 @@ terraform {
   }
   backend "s3" {
     bucket         = "gophbank-terraform-state-storage"
-    key            = "terraform.tfstate"
+    key            = "gophbank-dev.tfstate"
     region         = "us-east-1"
-    dynamodb_table = "gophbank-terraform-lock"
+    dynamodb_table = "gophbank-dev-terraform-lock"
     encrypt        = true
   }
 }
