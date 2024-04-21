@@ -3,25 +3,83 @@ name: Liquibase Update
 on:
   workflow_dispatch:
     branches: [ main ]
+    inputs:
+      terraform_working_dir:
+        type: choice
+        description: 'Terraform environment'
+        options:
+        - dev
+        - test
+        - prod
+
+env:
+  TERRAFORM_VERSION: "1.7.2"
+  TERRAFORM_DIR: "./terraform/live/${{ github.event.inputs.terraform_working_dir }}"
+  LIQUIBASE_WORKING_DIR: "./liquibase"
 
 jobs:
   execute-liquibase-update:
+    name: 'Perform DB Updates Via Liquibase'
     runs-on: ubuntu-latest
-    environment: 'liquibase'
+    environment:
+      name: 'AWS'
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4.1.1
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3.0.0
+      with:
+        terraform_version: ${{ env.TERRAFORM_VERSION }}
+
+    - name: Terraform Init
+      run: terraform init
+      working-directory: ${{ env.TERRAFORM_DIR }}
+
+    - name: Get DB Info
+      run: |
+        DB_ADDRESS=$(terraform output -json gophbank_db_address | jq -r .)
+        echo "::add-mask::$DB_ADDRESS"
+        echo "DB_ADDRESS=$DB_ADDRESS" >> $GITHUB_ENV
+        DB_DEFAULT_DATABASE=$(terraform output -json gophbank_created_db | jq -r .)
+        echo "::add-mask::$DB_DEFAULT_DATABASE"
+        echo "DB_DEFAULT_DATABASE=$DB_DEFAULT_DATABASE" >> $GITHUB_ENV
+        DB_USERNAME=$(terraform output -json gophbank_db_username | jq -r .)
+        echo "::add-mask::$DB_USERNAME"
+        echo "DB_USERNAME=$DB_USERNAME" >> $GITHUB_ENV
+        DB_PASSWORD=$(terraform output -json gophbank_db_password | jq -r .)
+        echo "::add-mask::$DB_PASSWORD"
+        echo "DB_PASSWORD=$DB_PASSWORD" >> $GITHUB_ENV
+      working-directory: ${{ env.TERRAFORM_DIR }}
 
     - name: Set up JDK 11
-      uses: actions/setup-java@v2
+      uses: actions/setup-java@v4.2.1
       with:
         java-version: '11'
         distribution: 'adopt'
 
+
     - name: Download Liquibase
       run: sudo snap install liquibase
 
+    - name: Download PostgreSQL JDBC Driver
+      run: |
+        mkdir jdbc
+        curl -L https://jdbc.postgresql.org/download/postgresql-42.2.23.jar -o jdbc/postgresql.jar
+      working-directory: ${{ env.LIQUIBASE_WORKING_DIR }}
+
+    - name: Install AWS East-US-1 RDS SSL Cert
+      run: |
+        mkdir ssl
+        curl -L https://truststore.pki.rds.amazonaws.com/us-east-1/us-east-1-bundle.pem -o ssl/us-east-1-bundle.pem
+        echo "SSL_CERT=ssl/us-east-1-bundle.pem" >> $GITHUB_ENV
+      working-directory: ${{ env.LIQUIBASE_WORKING_DIR }}
+
     - name: Run Liquibase Update
       run: |
-        liquibase --url ${{ secrets.DB_URL }} --username ${{ secrets.DB_USERNAME }} --password ${{ secrets.DB_PASSWORD }} --changeLogFile=./liquibase/changelog.yml update
+        liquibase --classpath=./jdbc/postgresql.jar --url="jdbc:postgresql://${{ env.DB_ADDRESS }}:5432/${{ env.DB_DEFAULT_DATABASE }}?sslmode=verify-full&sslrootcert=${{ env.SSL_CERT }}" --changeLogFile=./changelog.yml --username=${{ env.DB_USERNAME }} --password='${{ env.DB_PASSWORD }}' update
+      working-directory: ${{ env.LIQUIBASE_WORKING_DIR }}

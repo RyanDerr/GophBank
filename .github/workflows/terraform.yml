@@ -63,7 +63,7 @@ jobs:
       uses: actions/upload-artifact@v4.3.1
       with:
         name: tf-plan.out
-        path: terraform/tf-plan.out
+        path: ${{ env.TERRAFORM_DIR }}/tf-plan.out
 
   terraform_apply:
     name: 'Terraform Apply Plan'
@@ -89,7 +89,7 @@ jobs:
       uses: actions/download-artifact@v4.1.4
       with:
         name: tf-plan.out
-        path: terraform
+        path: ${{ env.TERRAFORM_DIR }}
 
     - name: Terraform Init
       run: terraform init

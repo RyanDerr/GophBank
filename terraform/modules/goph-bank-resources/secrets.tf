@@ -1,5 +1,11 @@
+variable "db_password_secret_name" {
+  description = "The name of the secret to store the database password"
+  type        = string
+  default     = ""
+}
+
 resource "aws_secretsmanager_secret" "pg_password" {
-  name        = "gophbank-${var.env}-pg-password"
+  name        = var.db_password_secret_name != "" ? var.db_password_secret_name : "gophbank-${var.env}-pg-password"
   description = "The password for the PostgreSQL database"
 }
 
