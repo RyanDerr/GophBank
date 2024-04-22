@@ -1,7 +1,11 @@
 --liquibase formatted sql
 
---changeset RyanDerr:create-schema-and-tables
+--changeset RyanDerr:create-schema-tables-and-iam
+
 CREATE SCHEMA IF NOT EXISTS gophbank;
+
+CREATE USER db_domain_users WITH LOGIN;
+GRANT rds_iam TO db_domain_users;
 
 CREATE TABLE IF NOT EXISTS gophbank.users (
     user_id SERIAL PRIMARY KEY,
@@ -37,5 +41,7 @@ CREATE TABLE IF NOT EXISTS gophbank.transactions (
 --rollback DROP TABLE IF EXISTS gophbank.transactions;
 --rollback DROP TYPE IF EXISTS account_type_enum;
 --rollback DROP TABLE IF EXISTS gophbank.accounts;
+--rollback DROP TYPE IF EXISTS account_type_enum;
 --rollback DROP TABLE IF EXISTS gophbank.users;
+--rollback DROP USER IF EXISTS db_domain_users;
 --rollback DROP SCHEMA IF EXISTS gophbank;

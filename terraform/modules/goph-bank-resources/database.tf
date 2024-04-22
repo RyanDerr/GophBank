@@ -64,9 +64,11 @@ resource "aws_db_instance" "gophbank_db" {
   multi_az                            = false
   identifier                          = "${var.db_name}-${var.env}"
   backup_retention_period             = 7
+  backup_window                       = "07:00-09:00"
   vpc_security_group_ids              = [aws_security_group.gophbank_db_sg.id]
   iam_database_authentication_enabled = true
-
+  performance_insights_enabled        = true
+  storage_encrypted                   = true
   tags = merge(
     local.common_tags,
   )
