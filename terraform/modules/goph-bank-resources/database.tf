@@ -51,20 +51,21 @@ resource "aws_security_group" "gophbank_db_sg" {
 }
 
 resource "aws_db_instance" "gophbank_db" {
-  allocated_storage       = 20
-  storage_type            = "gp2"
-  engine                  = "postgres"
-  engine_version          = var.postgres_version
-  instance_class          = var.postgres_instance_type
-  username                = var.postgres_username
-  password                = random_password.database_admin_password.result
-  db_name                 = var.db_name
-  skip_final_snapshot     = true
-  publicly_accessible     = true
-  multi_az                = false
-  identifier              = "${var.db_name}-${var.env}"
-  backup_retention_period = 7
-  vpc_security_group_ids  = [aws_security_group.gophbank_db_sg.id]
+  allocated_storage                   = 20
+  storage_type                        = "gp2"
+  engine                              = "postgres"
+  engine_version                      = var.postgres_version
+  instance_class                      = var.postgres_instance_type
+  username                            = var.postgres_username
+  password                            = random_password.database_admin_password.result
+  db_name                             = var.db_name
+  skip_final_snapshot                 = true
+  publicly_accessible                 = true
+  multi_az                            = false
+  identifier                          = "${var.db_name}-${var.env}"
+  backup_retention_period             = 7
+  vpc_security_group_ids              = [aws_security_group.gophbank_db_sg.id]
+  iam_database_authentication_enabled = true
 
   tags = merge(
     local.common_tags,
