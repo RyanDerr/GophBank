@@ -25,7 +25,7 @@ on:
 
 env:
   TERRAFORM_VERSION: "1.7.2"
-  TERRAFORM_DIR: "./terraform/live/${{ github.event.inputs.terraform_working_dir }}"
+  TERRAFORM_DIR: "./terraform/live/${{ github.event.inputs.terraform_working_dir || 'dev' }}"
 
 jobs:
   terraform_plan:
