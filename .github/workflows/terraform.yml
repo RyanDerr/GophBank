@@ -9,12 +9,23 @@ on:
     inputs:
       destroy:
         description: 'Create a destroy plan?'
-        required: false
+        type: choice
+        options:
+        - 'true'
+        - 'false'
         default: 'false'
+      terraform_working_dir:
+        type: choice
+        description: 'Terraform environment'
+        options:
+        - dev
+        - test
+        - prod
+        default: 'dev'
 
 env:
   TERRAFORM_VERSION: "1.7.2"
-  TERRAFORM_DIR: "./terraform"
+  TERRAFORM_DIR: "./terraform/live/${{ github.event.inputs.terraform_working_dir }}"
 
 jobs:
   terraform_plan:
@@ -25,6 +36,7 @@ jobs:
     env:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      TF_VAR_account_id: ${{ secrets.TF_VAR_account_id }}
 
     steps:
     - name: Checkout code
@@ -52,7 +64,7 @@ jobs:
       uses: actions/upload-artifact@v4.3.1
       with:
         name: tf-plan.out
-        path: terraform/tf-plan.out
+        path: ${{ env.TERRAFORM_DIR }}/tf-plan.out
 
   terraform_apply:
     name: 'Terraform Apply Plan'
@@ -78,7 +90,7 @@ jobs:
       uses: actions/download-artifact@v4.1.4
       with:
         name: tf-plan.out
-        path: terraform
+        path: ${{ env.TERRAFORM_DIR }}
 
     - name: Terraform Init
       run: terraform init

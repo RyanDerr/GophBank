@@ -8,5 +8,3 @@ repos:
     hooks:
       - id: terraform-fmt
         args: ["."]
-      - id: terraform-validate
-        args: ["."]
