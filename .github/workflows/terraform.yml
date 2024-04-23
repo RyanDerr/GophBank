@@ -53,7 +53,7 @@ jobs:
 
     - name: Terraform Plan
       run: |
-        if [ "${{ github.event.inputs.destroy }}" = "true" ]; then
+        if [ "${{ github.event.inputs.destroy || 'false' }}" = "true" ]; then
           terraform plan -destroy -out=tf-plan.out
         else
           terraform plan -out=tf-plan.out
