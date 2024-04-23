@@ -1,3 +1,5 @@
 databaseChangeLog:
 - include:
     file: ./changelogs/0000_init.sql
+- include:
+    file: ./changelogs/0001_create_indexes.sql
