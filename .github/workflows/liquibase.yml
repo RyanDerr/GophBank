@@ -1,4 +1,4 @@
-name: Liquibase Update
+name: Liquibase Database Update
 
 on:
   workflow_dispatch:
@@ -15,7 +15,7 @@ on:
 env:
   TERRAFORM_VERSION: "1.7.2"
   TERRAFORM_DIR: "./terraform/live/${{ github.event.inputs.terraform_working_dir }}"
-  LIQUIBASE_WORKING_DIR: "./liquibase"
+  LIQUIBASE_WORKING_DIR: "./db"
 
 jobs:
   execute-liquibase-update:
@@ -63,7 +63,7 @@ jobs:
         distribution: 'adopt'
 
 
-    - name: Download Liquibase
+    - name: Install Liquibase
       run: sudo snap install liquibase
 
     - name: Download PostgreSQL JDBC Driver
