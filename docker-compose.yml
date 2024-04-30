@@ -4,7 +4,7 @@ services:
     image: postgres:16.2
     container_name: bank-postgres
     volumes:
-      - ./local-setup/postgres/rds-iam-init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./db/local/rds-iam-init.sql:/docker-entrypoint-initdb.d/init.sql
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -20,8 +20,8 @@ services:
     image: liquibase/liquibase:4.27-alpine
     container_name: liquibase
     volumes:
-      - ./liquibase/changelog.yml:/liquibase/changelog.yml
-      - ./liquibase/changelogs:/liquibase/changelogs
+      - ./db/changelog.yml:/liquibase/changelog.yml
+      - ./db/changelogs:/liquibase/changelogs
     command:
       - --url=jdbc:postgresql://db:5432/local-db
       - --changeLogFile=./changelog.yml

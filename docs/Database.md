@@ -9,9 +9,9 @@ The PostgreSQL container is a popular open-source relational database. In this s
 ### Liquibase Container
 The Liquibase container is used to manage database schema changes. It applies changes to the PostgreSQL database using a changelog file.
 
-The changelog file `/liquibase/changelog.yml` contains a series of changesets, each of which describes a change to the database schema. These changesets are applied in the order they appear in the changelog.
+The changelog file `/db/changelog.yml` contains a series of changesets, each of which describes a change to the database schema. These changesets are applied in the order they appear in the changelog.
 
-The actual changesets are stored in separate files under the `/liquibase/changelogs/` directory. This allows for better organization and version control of your database schema changes.
+The actual changesets are stored in separate files under the `/db/changelogs/` directory. This allows for better organization and version control of your database schema changes.
 
 
 ### Workflow
@@ -21,7 +21,7 @@ Docker Compose will:
 
 - Start a PostgreSQL container.
 - Start a Liquibase container.
-- The Liquibase container will then read the `/liquibase/changelog.yml` file and apply the changesets found in the `/liquibase/changelogs/` directory to the PostgreSQL database.
+- The Liquibase container will then read the `/db/changelog.yml` file and apply the changesets found in the `/db/changelogs/` directory to the PostgreSQL database.
 - The condition: `service_healthy` line in the `docker-compose.yml` file ensures that Docker Compose waits for the PostgreSQL service to be healthy before starting the Liquibase service. This is crucial as the Liquibase service depends on the PostgreSQL service to be running and healthy.
 
 This setup ensures that your database schema is always in a known state and can be reliably reproduced across different environments.

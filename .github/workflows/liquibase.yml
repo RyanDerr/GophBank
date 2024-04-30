@@ -1,4 +1,4 @@
-name: Liquibase Update
+name: Liquibase Database Update
 
 on:
   workflow_dispatch:
@@ -12,24 +12,31 @@ on:
         - test
         - prod
 
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
 env:
   TERRAFORM_VERSION: "1.7.2"
   TERRAFORM_DIR: "./terraform/live/${{ github.event.inputs.terraform_working_dir }}"
-  LIQUIBASE_WORKING_DIR: "./liquibase"
+  LIQUIBASE_WORKING_DIR: "./db"
 
 jobs:
   execute-liquibase-update:
     name: 'Perform DB Updates Via Liquibase'
     runs-on: ubuntu-latest
-    environment:
-      name: 'AWS'
-    env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4.1.1
+
+    - name: Configure AWS Plan Credentials
+      uses: aws-actions/configure-aws-credentials@v4.0.2
+      with:
+        role-to-assume: ${{ secrets.AWS_READ_TF_STATE_ARN }}
+        aws-region: ${{ secrets.AWS_REGION }}
+        role-session-name: Github-OICD-Terraform-Plan
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3.0.0
@@ -37,7 +44,7 @@ jobs:
         terraform_version: ${{ env.TERRAFORM_VERSION }}
 
     - name: Terraform Init
-      run: terraform init
+      run: terraform init -backend-config="bucket=${{ secrets.AWS_BUCKET_NAME }}" -backend-config="dynamodb_table=${{ secrets.AWS_DYNAMODB_TABLE }}"
       working-directory: ${{ env.TERRAFORM_DIR }}
 
     - name: Get DB Info
@@ -63,7 +70,7 @@ jobs:
         distribution: 'adopt'
 
 
-    - name: Download Liquibase
+    - name: Install Liquibase
       run: sudo snap install liquibase
 
     - name: Download PostgreSQL JDBC Driver
