@@ -32,27 +32,24 @@ env:
   TERRAFORM_VERSION: "1.7.2"
   TERRAFORM_DIR: "./terraform/live/${{ github.event.inputs.terraform_working_dir || 'dev' }}"
   AWS_REGION: ${{ secrets.AWS_REGION }}
-  TF_LOG: INFO
 
 jobs:
   terraform_plan:
     name: 'Terraform Plan'
     runs-on: ubuntu-latest
-    environment:
-      name: 'AWS'
     env:
       TF_VAR_account_id: ${{ secrets.TF_VAR_account_id }}
 
     steps:
-    - name: Checkout code
+    - name: Checkout Code
       uses: actions/checkout@v4.0.0
 
-    - name: Configure AWS Credentials
+    - name: Configure AWS Plan Credentials
       uses: aws-actions/configure-aws-credentials@v4.0.2
       with:
-        role-to-assume: ${{ secrets.AWS_ROLE }}
+        role-to-assume: ${{ secrets.AWS_READ_TF_STATE_ARN }}
         aws-region: ${{ secrets.AWS_REGION }}
-        role-session-name: Github-OICD-Terraform
+        role-session-name: Github-OICD-Terraform-Plan
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3.0.0
@@ -60,12 +57,8 @@ jobs:
         terraform_version: ${{ env.TERRAFORM_VERSION }}
 
     - name: Terraform Init
-      run: terraform init
+      run: terraform init -backend-config="bucket=${{ secrets.AWS_BUCKET_NAME }}" -backend-config="dynamodb_table=${{ secrets.AWS_DYNAMODB_TABLE }}"
       working-directory: ${{ env.TERRAFORM_DIR }}
-      env:
-        AWS_DYNAMODB_TABLE: ${{ secrets.AWS_DYNAMODB_TABLE }}
-        AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
-        AWS_BUCKET_KEY_NAME: ${{ secrets.AWS_BUCKET_KEY }}
 
     - name: Terraform Plan
       run: |
@@ -90,8 +83,23 @@ jobs:
       name: 'AWS'
 
     steps:
-    - name: Checkout code
+    - name: Checkout Code
       uses: actions/checkout@v4.0.0
+
+
+    - name: Check Branch Before Attempting Credential Grabbing
+      run: |
+        if [[ "${{ github.ref }}" != "refs/heads/main" ]]; then
+          echo "This workflow can only grab creds to run on the main branch. Exiting..."
+          exit 1
+        fi
+
+    - name: Configure AWS Apply Credentials
+      uses: aws-actions/configure-aws-credentials@v4.0.2
+      with:
+        role-to-assume: ${{ secrets.AWS_TF_APPLY_ARN }}
+        aws-region: ${{ secrets.AWS_REGION }}
+        role-session-name: Github-OICD-Terraform-Apply
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3.0.0
@@ -105,12 +113,8 @@ jobs:
         path: ${{ env.TERRAFORM_DIR }}
 
     - name: Terraform Init
-      run: terraform init
+      run: terraform init -backend-config="bucket=${{ secrets.AWS_BUCKET_NAME }}" -backend-config="dynamodb_table=${{ secrets.AWS_DYNAMODB_TABLE }}"
       working-directory: ${{ env.TERRAFORM_DIR }}
-      env:
-        AWS_DYNAMODB_TABLE: ${{ secrets.AWS_DYNAMODB_TABLE }}
-        AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
-        AWS_BUCKET_KEY_NAME: ${{ secrets.AWS_BUCKET_KEY }}
 
     - name: Terraform Apply
       run: terraform apply -auto-approve tf-plan.out

@@ -8,5 +8,6 @@ terraform {
   }
   backend "s3" {
     encrypt = true
+    key     = "gophbank-dev.tfstate"
   }
 }
