@@ -93,19 +93,19 @@ func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]Gophban
 	return items, nil
 }
 
-const updateUser = `-- name: UpdateUser :one
+const updateUserAll = `-- name: UpdateUserAll :one
 UPDATE gophbank.users SET first_name = $1, last_name = $2, email = $3 WHERE user_id = $4 RETURNING user_id, first_name, last_name, email
 `
 
-type UpdateUserParams struct {
+type UpdateUserAllParams struct {
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
 	Email     string `json:"email"`
 	UserID    int32  `json:"user_id"`
 }
 
-func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (GophbankUsers, error) {
-	row := q.db.QueryRowContext(ctx, updateUser,
+func (q *Queries) UpdateUserAll(ctx context.Context, arg UpdateUserAllParams) (GophbankUsers, error) {
+	row := q.db.QueryRowContext(ctx, updateUserAll,
 		arg.FirstName,
 		arg.LastName,
 		arg.Email,

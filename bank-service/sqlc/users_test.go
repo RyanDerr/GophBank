@@ -50,14 +50,14 @@ func TestGetUser(t *testing.T) {
 func TestUpdateUser(t *testing.T) {
 	user1 := createRandomUser(t)
 
-	args := UpdateUserParams{
+	args := UpdateUserAllParams{
 		UserID:    user1.UserID,
 		FirstName: util.RandomName(),
 		LastName:  user1.LastName,
 		Email:     util.RandomEmail(),
 	}
 
-	user2, err := testQueries.UpdateUser(context.Background(), args)
+	user2, err := testQueries.UpdateUserAll(context.Background(), args)
 
 	require.NoError(t, err)
 	require.NotEmpty(t, user2)
