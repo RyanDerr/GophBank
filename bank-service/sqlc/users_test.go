@@ -47,7 +47,7 @@ func TestGetUser(t *testing.T) {
 	require.Equal(t, user1.Email, user2.Email)
 }
 
-func TestUpdateUser(t *testing.T) {
+func TestUpdateUserAll(t *testing.T) {
 	user1 := createRandomUser(t)
 
 	args := UpdateUserAllParams{
@@ -64,6 +64,64 @@ func TestUpdateUser(t *testing.T) {
 
 	require.Equal(t, user1.UserID, user2.UserID)
 	require.Equal(t, args.FirstName, user2.FirstName)
+	require.Equal(t, user1.LastName, user2.LastName)
+	require.Equal(t, args.Email, user2.Email)
+}
+
+func TestUpdateUserFirstName(t *testing.T) {
+	user1 := createRandomUser(t)
+
+	args := UpdateUserFirstNameParams{
+		UserID:    user1.UserID,
+		FirstName: util.RandomName(),
+	}
+
+	user2, err := testQueries.UpdateUserFirstName(context.Background(), args)
+
+	require.NoError(t, err)
+	require.NotEmpty(t, user2)
+
+	require.Equal(t, user1.UserID, user2.UserID)
+	require.Equal(t, args.FirstName, user2.FirstName)
+	require.Equal(t, user1.LastName, user2.LastName)
+	require.Equal(t, user1.Email, user2.Email)
+}
+
+func TestUpdateUserLastName(t *testing.T) {
+	user1 := createRandomUser(t)
+
+	args := UpdateUserLastNameParams{
+		UserID:   user1.UserID,
+		LastName: util.RandomName(),
+	}
+
+	user2, err := testQueries.UpdateUserLastName(context.Background(), args)
+
+	require.NoError(t, err)
+	require.NotEmpty(t, user2)
+
+	require.Equal(t, user1.UserID, user2.UserID)
+	require.Equal(t, user1.FirstName, user2.FirstName)
+	require.Equal(t, args.LastName, user2.LastName)
+	require.Equal(t, user1.Email, user2.Email)
+}
+
+func TestUpdateUserEmail(t *testing.T) {
+
+	user1 := createRandomUser(t)
+
+	args := UpdateUserEmailParams{
+		UserID: user1.UserID,
+		Email:  util.RandomEmail(),
+	}
+
+	user2, err := testQueries.UpdateUserEmail(context.Background(), args)
+
+	require.NoError(t, err)
+	require.NotEmpty(t, user2)
+
+	require.Equal(t, user1.UserID, user2.UserID)
+	require.Equal(t, user1.FirstName, user2.FirstName)
 	require.Equal(t, user1.LastName, user2.LastName)
 	require.Equal(t, args.Email, user2.Email)
 }
