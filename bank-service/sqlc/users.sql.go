@@ -3,7 +3,7 @@
 //   sqlc v1.26.0
 // source: users.sql
 
-package sqlc
+package db
 
 import (
 	"context"
@@ -93,24 +93,87 @@ func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]Gophban
 	return items, nil
 }
 
-const updateUser = `-- name: UpdateUser :one
+const updateUserAll = `-- name: UpdateUserAll :one
 UPDATE gophbank.users SET first_name = $1, last_name = $2, email = $3 WHERE user_id = $4 RETURNING user_id, first_name, last_name, email
 `
 
-type UpdateUserParams struct {
+type UpdateUserAllParams struct {
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
 	Email     string `json:"email"`
 	UserID    int32  `json:"user_id"`
 }
 
-func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (GophbankUsers, error) {
-	row := q.db.QueryRowContext(ctx, updateUser,
+func (q *Queries) UpdateUserAll(ctx context.Context, arg UpdateUserAllParams) (GophbankUsers, error) {
+	row := q.db.QueryRowContext(ctx, updateUserAll,
 		arg.FirstName,
 		arg.LastName,
 		arg.Email,
 		arg.UserID,
 	)
+	var i GophbankUsers
+	err := row.Scan(
+		&i.UserID,
+		&i.FirstName,
+		&i.LastName,
+		&i.Email,
+	)
+	return i, err
+}
+
+const updateUserEmail = `-- name: UpdateUserEmail :one
+UPDATE gophbank.users SET email = $1 WHERE user_id = $2 RETURNING user_id, first_name, last_name, email
+`
+
+type UpdateUserEmailParams struct {
+	Email  string `json:"email"`
+	UserID int32  `json:"user_id"`
+}
+
+func (q *Queries) UpdateUserEmail(ctx context.Context, arg UpdateUserEmailParams) (GophbankUsers, error) {
+	row := q.db.QueryRowContext(ctx, updateUserEmail, arg.Email, arg.UserID)
+	var i GophbankUsers
+	err := row.Scan(
+		&i.UserID,
+		&i.FirstName,
+		&i.LastName,
+		&i.Email,
+	)
+	return i, err
+}
+
+const updateUserFirstName = `-- name: UpdateUserFirstName :one
+UPDATE gophbank.users SET first_name = $1 WHERE user_id = $2 RETURNING user_id, first_name, last_name, email
+`
+
+type UpdateUserFirstNameParams struct {
+	FirstName string `json:"first_name"`
+	UserID    int32  `json:"user_id"`
+}
+
+func (q *Queries) UpdateUserFirstName(ctx context.Context, arg UpdateUserFirstNameParams) (GophbankUsers, error) {
+	row := q.db.QueryRowContext(ctx, updateUserFirstName, arg.FirstName, arg.UserID)
+	var i GophbankUsers
+	err := row.Scan(
+		&i.UserID,
+		&i.FirstName,
+		&i.LastName,
+		&i.Email,
+	)
+	return i, err
+}
+
+const updateUserLastName = `-- name: UpdateUserLastName :one
+UPDATE gophbank.users SET last_name = $1 WHERE user_id = $2 RETURNING user_id, first_name, last_name, email
+`
+
+type UpdateUserLastNameParams struct {
+	LastName string `json:"last_name"`
+	UserID   int32  `json:"user_id"`
+}
+
+func (q *Queries) UpdateUserLastName(ctx context.Context, arg UpdateUserLastNameParams) (GophbankUsers, error) {
+	row := q.db.QueryRowContext(ctx, updateUserLastName, arg.LastName, arg.UserID)
 	var i GophbankUsers
 	err := row.Scan(
 		&i.UserID,
