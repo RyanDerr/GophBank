@@ -1,6 +1,7 @@
 package util
 
 import (
+	"math"
 	"math/rand"
 	"strings"
 	"time"
@@ -17,6 +18,16 @@ func init() {
 
 func RandomInt(min, max int64) int64 {
 	return min + r.Int63n(max-min+1)
+}
+
+func RandomInterestRate() float64 {
+	interestRate := math.Round((rand.Float64()*3+0.01)*100) / 100
+	return interestRate
+}
+
+func RandomMoney(min, max float64) float64 {
+	randomFloat := min + r.Float64()*(max-min)
+	return math.Round(randomFloat*100) / 100
 }
 
 func RandomString(n int) string {
