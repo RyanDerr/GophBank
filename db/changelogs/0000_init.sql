@@ -11,7 +11,8 @@ CREATE TABLE IF NOT EXISTS gophbank.users (
     user_id SERIAL PRIMARY KEY,
     first_name VARCHAR(50) CHECK (first_name ~ '^[A-Za-z]+$') NOT NULL,
     last_name VARCHAR(50) CHECK (last_name ~ '^[A-Za-z]+$') NOT NULL,
-    email VARCHAR(100) UNIQUE NOT NULL
+    email VARCHAR(100) UNIQUE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TYPE account_type_enum AS ENUM ('checking', 'savings');
@@ -21,7 +22,8 @@ CREATE TABLE IF NOT EXISTS gophbank.accounts (
     user_id INTEGER REFERENCES gophbank.users(user_id),
     account_type account_type_enum NOT NULL,
     balance DECIMAL(12, 2) CHECK (balance >= 0) NOT NULL,
-    interest_rate DECIMAL(3, 2) CHECK ((account_type = 'savings' AND interest_rate >= 0) OR (account_type = 'checking' AND interest_rate = 0))
+    interest_rate DECIMAL(3, 2) CHECK ((account_type = 'savings' AND interest_rate >= 0) OR (account_type = 'checking' AND interest_rate = 0)),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS gophbank.transactions (

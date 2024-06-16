@@ -58,6 +58,7 @@ type GophbankAccounts struct {
 	AccountType  AccountTypeEnum `json:"account_type"`
 	Balance      string          `json:"balance"`
 	InterestRate sql.NullString  `json:"interest_rate"`
+	CreatedAt    sql.NullTime    `json:"created_at"`
 }
 
 type GophbankTransactions struct {
@@ -70,8 +71,9 @@ type GophbankTransactions struct {
 }
 
 type GophbankUsers struct {
-	UserID    int32  `json:"user_id"`
-	FirstName string `json:"first_name"`
-	LastName  string `json:"last_name"`
-	Email     string `json:"email"`
+	UserID    int32        `json:"user_id"`
+	FirstName string       `json:"first_name"`
+	LastName  string       `json:"last_name"`
+	Email     string       `json:"email"`
+	CreatedAt sql.NullTime `json:"created_at"`
 }
