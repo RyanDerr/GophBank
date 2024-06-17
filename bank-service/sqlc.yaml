@@ -2,8 +2,8 @@ version: "2"
 sql:
   - name: "db"
     engine: "postgresql"
-    queries: "../db/query/"
-    schema: "../db/changelogs/"
+    queries: "../db/query"
+    schema: "../db/changelogs"
     gen:
         go:
             package: "db"
@@ -12,3 +12,6 @@ sql:
             emit_prepared_queries: false
             emit_interface: false
             emit_exact_table_names: true
+            overrides:
+            - go_type: "float64"
+              db_type: "pg_catalog.numeric"

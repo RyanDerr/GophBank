@@ -7,27 +7,20 @@ package db
 
 import (
 	"context"
-	"database/sql"
 )
 
 const createTransaction = `-- name: CreateTransaction :one
-INSERT INTO gophbank.transactions (from_account_id, to_account_id, amount, transaction_type) VALUES ($1, $2, $3, $4) RETURNING transaction_id, from_account_id, to_account_id, amount, transaction_time, transaction_type
+INSERT INTO gophbank.transactions (from_account_id, to_account_id, amount) VALUES ($1, $2, $3) RETURNING transaction_id, from_account_id, to_account_id, amount, transaction_time
 `
 
 type CreateTransactionParams struct {
-	FromAccountID   sql.NullInt32 `json:"from_account_id"`
-	ToAccountID     sql.NullInt32 `json:"to_account_id"`
-	Amount          string        `json:"amount"`
-	TransactionType string        `json:"transaction_type"`
+	FromAccountID int32   `json:"from_account_id"`
+	ToAccountID   int32   `json:"to_account_id"`
+	Amount        float64 `json:"amount"`
 }
 
 func (q *Queries) CreateTransaction(ctx context.Context, arg CreateTransactionParams) (GophbankTransactions, error) {
-	row := q.db.QueryRowContext(ctx, createTransaction,
-		arg.FromAccountID,
-		arg.ToAccountID,
-		arg.Amount,
-		arg.TransactionType,
-	)
+	row := q.db.QueryRowContext(ctx, createTransaction, arg.FromAccountID, arg.ToAccountID, arg.Amount)
 	var i GophbankTransactions
 	err := row.Scan(
 		&i.TransactionID,
@@ -35,13 +28,12 @@ func (q *Queries) CreateTransaction(ctx context.Context, arg CreateTransactionPa
 		&i.ToAccountID,
 		&i.Amount,
 		&i.TransactionTime,
-		&i.TransactionType,
 	)
 	return i, err
 }
 
 const getTransaction = `-- name: GetTransaction :one
-SELECT transaction_id, from_account_id, to_account_id, amount, transaction_time, transaction_type FROM gophbank.transactions WHERE transaction_id = $1 LIMIT 1
+SELECT transaction_id, from_account_id, to_account_id, amount, transaction_time FROM gophbank.transactions WHERE transaction_id = $1 LIMIT 1
 `
 
 func (q *Queries) GetTransaction(ctx context.Context, transactionID int32) (GophbankTransactions, error) {
@@ -53,20 +45,19 @@ func (q *Queries) GetTransaction(ctx context.Context, transactionID int32) (Goph
 		&i.ToAccountID,
 		&i.Amount,
 		&i.TransactionTime,
-		&i.TransactionType,
 	)
 	return i, err
 }
 
 const listUserTransactions = `-- name: ListUserTransactions :many
-SELECT transaction_id, from_account_id, to_account_id, amount, transaction_time, transaction_type FROM gophbank.transactions WHERE from_account_id = $1 OR to_account_id = $2 ORDER BY transaction_id LIMIT $3 OFFSET $4
+SELECT transaction_id, from_account_id, to_account_id, amount, transaction_time FROM gophbank.transactions WHERE from_account_id = $1 OR to_account_id = $2 ORDER BY transaction_id LIMIT $3 OFFSET $4
 `
 
 type ListUserTransactionsParams struct {
-	FromAccountID sql.NullInt32 `json:"from_account_id"`
-	ToAccountID   sql.NullInt32 `json:"to_account_id"`
-	Limit         int32         `json:"limit"`
-	Offset        int32         `json:"offset"`
+	FromAccountID int32 `json:"from_account_id"`
+	ToAccountID   int32 `json:"to_account_id"`
+	Limit         int32 `json:"limit"`
+	Offset        int32 `json:"offset"`
 }
 
 func (q *Queries) ListUserTransactions(ctx context.Context, arg ListUserTransactionsParams) ([]GophbankTransactions, error) {
@@ -89,7 +80,6 @@ func (q *Queries) ListUserTransactions(ctx context.Context, arg ListUserTransact
 			&i.ToAccountID,
 			&i.Amount,
 			&i.TransactionTime,
-			&i.TransactionType,
 		); err != nil {
 			return nil, err
 		}

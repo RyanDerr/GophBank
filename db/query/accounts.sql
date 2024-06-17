@@ -7,10 +7,10 @@ SELECT * FROM gophbank.accounts WHERE account_id = $1 LIMIT 1;
 -- name: GetAccountForUpdate :one
 SELECT * FROM gophbank.accounts WHERE account_id = $1 LIMIT 1 FOR NO KEY UPDATE;
 
--- name: ListAccounts :many
+-- name: ListUserAccounts :many
 SELECT * FROM gophbank.accounts WHERE user_id = $1 ORDER BY account_id LIMIT $2 OFFSET $3;
 
--- name: UpdateAccount :one
+-- name: UpdateAccountBalance :one
 UPDATE gophbank.accounts SET balance = $2 WHERE account_id = $1 RETURNING *;
 
 -- name: AddAccountBalance :one

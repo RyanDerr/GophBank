@@ -5,9 +5,9 @@
 package db
 
 import (
-	"database/sql"
 	"database/sql/driver"
 	"fmt"
+	"time"
 )
 
 type AccountTypeEnum string
@@ -54,26 +54,25 @@ func (ns NullAccountTypeEnum) Value() (driver.Value, error) {
 
 type GophbankAccounts struct {
 	AccountID    int32           `json:"account_id"`
-	UserID       sql.NullInt32   `json:"user_id"`
+	UserID       int32           `json:"user_id"`
 	AccountType  AccountTypeEnum `json:"account_type"`
-	Balance      string          `json:"balance"`
-	InterestRate sql.NullString  `json:"interest_rate"`
-	CreatedAt    sql.NullTime    `json:"created_at"`
+	Balance      float64         `json:"balance"`
+	InterestRate float64         `json:"interest_rate"`
+	CreatedAt    time.Time       `json:"created_at"`
 }
 
 type GophbankTransactions struct {
-	TransactionID   int32         `json:"transaction_id"`
-	FromAccountID   sql.NullInt32 `json:"from_account_id"`
-	ToAccountID     sql.NullInt32 `json:"to_account_id"`
-	Amount          string        `json:"amount"`
-	TransactionTime sql.NullTime  `json:"transaction_time"`
-	TransactionType string        `json:"transaction_type"`
+	TransactionID   int32     `json:"transaction_id"`
+	FromAccountID   int32     `json:"from_account_id"`
+	ToAccountID     int32     `json:"to_account_id"`
+	Amount          float64   `json:"amount"`
+	TransactionTime time.Time `json:"transaction_time"`
 }
 
 type GophbankUsers struct {
-	UserID    int32        `json:"user_id"`
-	FirstName string       `json:"first_name"`
-	LastName  string       `json:"last_name"`
-	Email     string       `json:"email"`
-	CreatedAt sql.NullTime `json:"created_at"`
+	UserID    int32     `json:"user_id"`
+	FirstName string    `json:"first_name"`
+	LastName  string    `json:"last_name"`
+	Email     string    `json:"email"`
+	CreatedAt time.Time `json:"created_at"`
 }

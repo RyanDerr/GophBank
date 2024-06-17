@@ -1,5 +1,5 @@
 -- name: CreateTransaction :one
-INSERT INTO gophbank.transactions (from_account_id, to_account_id, amount, transaction_type) VALUES ($1, $2, $3, $4) RETURNING *;
+INSERT INTO gophbank.transactions (from_account_id, to_account_id, amount) VALUES ($1, $2, $3) RETURNING *;
 
 -- name: GetTransaction :one
 SELECT * FROM gophbank.transactions WHERE transaction_id = $1 LIMIT 1;

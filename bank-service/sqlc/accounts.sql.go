@@ -7,7 +7,6 @@ package db
 
 import (
 	"context"
-	"database/sql"
 )
 
 const addAccountBalance = `-- name: AddAccountBalance :one
@@ -15,8 +14,8 @@ UPDATE gophbank.accounts SET balance = balance + $1 WHERE account_id = $2 RETURN
 `
 
 type AddAccountBalanceParams struct {
-	Amount string `json:"amount"`
-	ID     int32  `json:"id"`
+	Amount float64 `json:"amount"`
+	ID     int32   `json:"id"`
 }
 
 func (q *Queries) AddAccountBalance(ctx context.Context, arg AddAccountBalanceParams) (GophbankAccounts, error) {
@@ -38,10 +37,10 @@ INSERT INTO gophbank.accounts (user_id, account_type, balance, interest_rate) VA
 `
 
 type CreateAccountParams struct {
-	UserID       sql.NullInt32   `json:"user_id"`
+	UserID       int32           `json:"user_id"`
 	AccountType  AccountTypeEnum `json:"account_type"`
-	Balance      string          `json:"balance"`
-	InterestRate sql.NullString  `json:"interest_rate"`
+	Balance      float64         `json:"balance"`
+	InterestRate float64         `json:"interest_rate"`
 }
 
 func (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams) (GophbankAccounts, error) {
@@ -108,18 +107,18 @@ func (q *Queries) GetAccountForUpdate(ctx context.Context, accountID int32) (Gop
 	return i, err
 }
 
-const listAccounts = `-- name: ListAccounts :many
+const listUserAccounts = `-- name: ListUserAccounts :many
 SELECT account_id, user_id, account_type, balance, interest_rate, created_at FROM gophbank.accounts WHERE user_id = $1 ORDER BY account_id LIMIT $2 OFFSET $3
 `
 
-type ListAccountsParams struct {
-	UserID sql.NullInt32 `json:"user_id"`
-	Limit  int32         `json:"limit"`
-	Offset int32         `json:"offset"`
+type ListUserAccountsParams struct {
+	UserID int32 `json:"user_id"`
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
 }
 
-func (q *Queries) ListAccounts(ctx context.Context, arg ListAccountsParams) ([]GophbankAccounts, error) {
-	rows, err := q.db.QueryContext(ctx, listAccounts, arg.UserID, arg.Limit, arg.Offset)
+func (q *Queries) ListUserAccounts(ctx context.Context, arg ListUserAccountsParams) ([]GophbankAccounts, error) {
+	rows, err := q.db.QueryContext(ctx, listUserAccounts, arg.UserID, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
@@ -148,17 +147,17 @@ func (q *Queries) ListAccounts(ctx context.Context, arg ListAccountsParams) ([]G
 	return items, nil
 }
 
-const updateAccount = `-- name: UpdateAccount :one
+const updateAccountBalance = `-- name: UpdateAccountBalance :one
 UPDATE gophbank.accounts SET balance = $2 WHERE account_id = $1 RETURNING account_id, user_id, account_type, balance, interest_rate, created_at
 `
 
-type UpdateAccountParams struct {
-	AccountID int32  `json:"account_id"`
-	Balance   string `json:"balance"`
+type UpdateAccountBalanceParams struct {
+	AccountID int32   `json:"account_id"`
+	Balance   float64 `json:"balance"`
 }
 
-func (q *Queries) UpdateAccount(ctx context.Context, arg UpdateAccountParams) (GophbankAccounts, error) {
-	row := q.db.QueryRowContext(ctx, updateAccount, arg.AccountID, arg.Balance)
+func (q *Queries) UpdateAccountBalance(ctx context.Context, arg UpdateAccountBalanceParams) (GophbankAccounts, error) {
+	row := q.db.QueryRowContext(ctx, updateAccountBalance, arg.AccountID, arg.Balance)
 	var i GophbankAccounts
 	err := row.Scan(
 		&i.AccountID,
