@@ -10,4 +10,5 @@ sqlc_generate:
 	sqlc -f ./bank-service/sqlc.yaml generate
 
 go_test: docker_start
+	sleep 1
 	cd bank-service && go test -v -cover ./...

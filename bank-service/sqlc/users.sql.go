@@ -10,7 +10,7 @@ import (
 )
 
 const createUser = `-- name: CreateUser :one
-INSERT INTO gophbank.users (first_name, last_name, email) VALUES ($1, $2, $3) RETURNING user_id, first_name, last_name, email
+INSERT INTO gophbank.users (first_name, last_name, email) VALUES ($1, $2, $3) RETURNING user_id, first_name, last_name, email, created_at
 `
 
 type CreateUserParams struct {
@@ -27,6 +27,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (Gophban
 		&i.FirstName,
 		&i.LastName,
 		&i.Email,
+		&i.CreatedAt,
 	)
 	return i, err
 }
@@ -41,7 +42,7 @@ func (q *Queries) DeleteUser(ctx context.Context, userID int32) error {
 }
 
 const getUser = `-- name: GetUser :one
-SELECT user_id, first_name, last_name, email FROM gophbank.users WHERE user_id = $1 LIMIT 1
+SELECT user_id, first_name, last_name, email, created_at FROM gophbank.users WHERE user_id = $1 LIMIT 1
 `
 
 func (q *Queries) GetUser(ctx context.Context, userID int32) (GophbankUsers, error) {
@@ -52,12 +53,13 @@ func (q *Queries) GetUser(ctx context.Context, userID int32) (GophbankUsers, err
 		&i.FirstName,
 		&i.LastName,
 		&i.Email,
+		&i.CreatedAt,
 	)
 	return i, err
 }
 
 const listUsers = `-- name: ListUsers :many
-SELECT user_id, first_name, last_name, email FROM gophbank.users ORDER BY user_id LIMIT $1 OFFSET $2
+SELECT user_id, first_name, last_name, email, created_at FROM gophbank.users ORDER BY user_id LIMIT $1 OFFSET $2
 `
 
 type ListUsersParams struct {
@@ -79,6 +81,7 @@ func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]Gophban
 			&i.FirstName,
 			&i.LastName,
 			&i.Email,
+			&i.CreatedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -94,7 +97,7 @@ func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]Gophban
 }
 
 const updateUserAll = `-- name: UpdateUserAll :one
-UPDATE gophbank.users SET first_name = $1, last_name = $2, email = $3 WHERE user_id = $4 RETURNING user_id, first_name, last_name, email
+UPDATE gophbank.users SET first_name = $1, last_name = $2, email = $3 WHERE user_id = $4 RETURNING user_id, first_name, last_name, email, created_at
 `
 
 type UpdateUserAllParams struct {
@@ -117,12 +120,13 @@ func (q *Queries) UpdateUserAll(ctx context.Context, arg UpdateUserAllParams) (G
 		&i.FirstName,
 		&i.LastName,
 		&i.Email,
+		&i.CreatedAt,
 	)
 	return i, err
 }
 
 const updateUserEmail = `-- name: UpdateUserEmail :one
-UPDATE gophbank.users SET email = $1 WHERE user_id = $2 RETURNING user_id, first_name, last_name, email
+UPDATE gophbank.users SET email = $1 WHERE user_id = $2 RETURNING user_id, first_name, last_name, email, created_at
 `
 
 type UpdateUserEmailParams struct {
@@ -138,12 +142,13 @@ func (q *Queries) UpdateUserEmail(ctx context.Context, arg UpdateUserEmailParams
 		&i.FirstName,
 		&i.LastName,
 		&i.Email,
+		&i.CreatedAt,
 	)
 	return i, err
 }
 
 const updateUserFirstName = `-- name: UpdateUserFirstName :one
-UPDATE gophbank.users SET first_name = $1 WHERE user_id = $2 RETURNING user_id, first_name, last_name, email
+UPDATE gophbank.users SET first_name = $1 WHERE user_id = $2 RETURNING user_id, first_name, last_name, email, created_at
 `
 
 type UpdateUserFirstNameParams struct {
@@ -159,12 +164,13 @@ func (q *Queries) UpdateUserFirstName(ctx context.Context, arg UpdateUserFirstNa
 		&i.FirstName,
 		&i.LastName,
 		&i.Email,
+		&i.CreatedAt,
 	)
 	return i, err
 }
 
 const updateUserLastName = `-- name: UpdateUserLastName :one
-UPDATE gophbank.users SET last_name = $1 WHERE user_id = $2 RETURNING user_id, first_name, last_name, email
+UPDATE gophbank.users SET last_name = $1 WHERE user_id = $2 RETURNING user_id, first_name, last_name, email, created_at
 `
 
 type UpdateUserLastNameParams struct {
@@ -180,6 +186,7 @@ func (q *Queries) UpdateUserLastName(ctx context.Context, arg UpdateUserLastName
 		&i.FirstName,
 		&i.LastName,
 		&i.Email,
+		&i.CreatedAt,
 	)
 	return i, err
 }
